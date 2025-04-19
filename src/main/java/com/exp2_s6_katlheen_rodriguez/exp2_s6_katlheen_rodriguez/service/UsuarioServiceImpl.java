@@ -2,8 +2,12 @@ package com.exp2_s6_katlheen_rodriguez.exp2_s6_katlheen_rodriguez.service;
 
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exp2_s6_katlheen_rodriguez.exp2_s6_katlheen_rodriguez.model.Usuario;
 import com.exp2_s6_katlheen_rodriguez.exp2_s6_katlheen_rodriguez.repository.UsuarioRepository;
@@ -12,43 +16,70 @@ import com.exp2_s6_katlheen_rodriguez.exp2_s6_katlheen_rodriguez.repository.Usua
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UsuarioServiceImpl.class);
+
     @Autowired
     private UsuarioRepository usuarioRepository;
 
     //Obtener todos los usuarios
     @Override
     public List<Usuario> getAllUsuarios() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        System.out.println("Consultando usuarios: " + usuarios);
-        return usuarios;
+        try {
+            List<Usuario> usuarios = usuarioRepository.findAll();
+            logger.info("Consultando usuarios: {}", usuarios);
+            return usuarios;
+        } catch (Exception e) {
+            logger.error("Error al obtener usuarios", e);
+            return null;
+        }
     }
 
-    //Obtener un usuario por id
+    //Obtener un usuario por ID
     @Override
     public Optional<Usuario> getUsuarioById(Long id) {
-        return usuarioRepository.findById(id);
+        try {
+            return usuarioRepository.findById(id);
+        } catch (Exception e) {
+            logger.error("Error al obtener el usuario con ID {}", id, e);
+            return Optional.empty();
+        }
     }
 
     //Crear un nuevo usuario
     @Override
     public Usuario createUsuario(Usuario usuario) {
-        return usuarioRepository.save(usuario);
+        try {
+            return usuarioRepository.save(usuario);
+        } catch (Exception e) {
+            logger.error("Error al crear el usuario", e);
+            return null;
+        }
     }
 
     //Actualizar un usuario
     @Override
     public Usuario updateUsuario(Long id, Usuario usuario) {
-        if (usuarioRepository.existsById(id)) {
-            usuario.setId(id);
-            return usuarioRepository.save(usuario);
-        } else {
+        try {
+            if (usuarioRepository.existsById(id)) {
+                usuario.setId(id);
+                return usuarioRepository.save(usuario);
+            } else {
+                logger.warn("No se encontró el usuario con ID: {}", id);
+                return null;
+            }
+        } catch (Exception e) {
+            logger.error("Error al actualizar el usuario con ID {}", id, e);
             return null;
         }
     }
 
-    // Eliminar un usuario
+    //Eliminar un usuario
     @Override
     public void deleteUsuario(Long id) {
-        usuarioRepository.deleteById(id);
+        try {
+            usuarioRepository.deleteById(id);
+        } catch (Exception e) {
+            logger.error("Error al eliminar el usuario con ID {}", id, e);
+        }
     }
 }
